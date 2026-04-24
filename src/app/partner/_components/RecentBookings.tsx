@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar } from "@/ui/components/Avatar";
 import { Button } from "@/ui/components/Button";
@@ -29,6 +29,10 @@ export function RecentBookings({
   viewAllHref = "/partner/bookings",
 }: RecentBookingsProps) {
   const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch(viewAllHref);
+  }, [router, viewAllHref]);
 
   return (
     <div className="flex w-full flex-col items-start gap-6">

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Tabs } from "@/ui/components/Tabs";
 
@@ -17,6 +17,12 @@ interface PartnerTabsProps {
 export function PartnerTabs({ basePath = "/partner" }: PartnerTabsProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    TABS.forEach((tab) => {
+      router.prefetch(`${basePath}/${tab.segment}`);
+    });
+  }, [basePath, router]);
 
   return (
     <Tabs>
