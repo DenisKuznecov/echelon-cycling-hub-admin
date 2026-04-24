@@ -121,7 +121,7 @@ const DefaultPageLayoutRoot = React.forwardRef<
             </TopbarWithRightNav.NavItem>
             <SubframeCore.DropdownMenu.Root>
               <SubframeCore.DropdownMenu.Trigger asChild={true}>
-                <Avatar>
+                <Avatar className="cursor-pointer">
                   <span className="font-body-bold">{avatarInitial}</span>
                 </Avatar>
               </SubframeCore.DropdownMenu.Trigger>

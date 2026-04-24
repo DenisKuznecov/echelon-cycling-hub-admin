@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 html {
-  font-family: Inter;
+  font-family: Geist, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
   height: 100vh;
   display: flex;
   flex-direction: column;
