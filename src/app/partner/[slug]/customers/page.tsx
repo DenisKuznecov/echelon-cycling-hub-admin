@@ -1,14 +1,47 @@
 import React from "react";
+import { notFound } from "next/navigation";
+import { AllCustomersTable } from "../../_components/AllCustomersTable";
+import { resolvePartnerBySlug } from "../../_lib/resolvePartner";
+import {
+  CUSTOMERS_PAGE_SIZE,
+  loadPartnerCustomersPage,
+} from "../../_lib/loadPartnerCustomers";
 
-export default function PartnerSlugCustomersPage() {
+export default async function PartnerSlugCustomersPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{
+    page?: string;
+    query?: string;
+  }>;
+}) {
+  const [{ slug }, { page: pageParam, query: queryParam }] = await Promise.all([
+    params,
+    searchParams,
+  ]);
+  const page = Math.max(1, Number(pageParam) || 1);
+  const query = queryParam ?? "";
+
+  const partner = await resolvePartnerBySlug(slug);
+  if (!partner) {
+    notFound();
+  }
+
+  const { customers, count } = await loadPartnerCustomersPage(
+    partner.id,
+    page,
+    query,
+  );
+  const totalPages = Math.max(1, Math.ceil(count / CUSTOMERS_PAGE_SIZE));
+
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-2 rounded-md border border-solid border-neutral-border bg-default-background py-24">
-      <span className="text-heading-2 font-heading-2 text-default-font text-center">
-        Customers
-      </span>
-      <span className="text-body font-body text-subtext-color text-center">
-        Coming soon
-      </span>
-    </div>
+    <AllCustomersTable
+      customers={customers}
+      currentPage={page}
+      totalPages={totalPages}
+      query={query}
+    />
   );
 }

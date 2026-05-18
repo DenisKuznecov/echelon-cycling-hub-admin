@@ -32,6 +32,17 @@ export type PartnerBookingRow = {
   customer_phone: string | null;
 };
 
+export type PartnerCustomerRow = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  birthday: string | null;
+  partner_id: string | null;
+  order_numbers: (number | string)[] | null;
+  order_numbers_text: string | null;
+};
+
 export type PartnerRow = {
   id: string;
   name: string;
