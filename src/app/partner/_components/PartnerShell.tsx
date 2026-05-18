@@ -13,6 +13,7 @@ interface PartnerShellProps {
     location: string;
     promo_code: string;
     slug: string;
+    hero_image_url?: string | null;
   } | null;
   basePath?: string;
 }
@@ -23,6 +24,7 @@ export function PartnerShell({
   basePath = "/partner",
 }: PartnerShellProps) {
   const partnerName = partner?.name || "Partner";
+  const heroImageUrl = partner?.hero_image_url ?? null;
   const [copied, setCopied] = React.useState(false);
 
   const handleCopyPartnerLink = React.useCallback(async () => {
@@ -75,11 +77,19 @@ export function PartnerShell({
           </span>
         </div>
         <div className="flex h-96 w-full flex-none flex-col items-start gap-2 overflow-hidden rounded-md relative">
-          <img
-            className="min-h-[0px] w-full grow shrink-0 basis-0 object-cover"
-            src="https://res.cloudinary.com/subframe/image/upload/v1776354243/uploads/36440/pbzs0xrxp7yk5szwwej2.jpg"
-            alt="Hotel Valdemossa"
-          />
+          {heroImageUrl ? (
+            <img
+              className="min-h-[0px] w-full grow shrink-0 basis-0 object-cover"
+              src={heroImageUrl}
+              alt={partnerName}
+            />
+          ) : (
+            <div
+              role="img"
+              aria-label={partnerName}
+              className="min-h-[0px] w-full grow shrink-0 basis-0 bg-gradient-to-br from-[#002F50] via-[#1C466A] to-[#4A90C2]"
+            />
+          )}
           <div className="flex items-start absolute inset-0 bg-gradient-to-b from-[rgba(0,47,80,0.3)] to-[rgba(28,70,106,0.8)]" />
         </div>
       </div>

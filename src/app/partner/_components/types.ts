@@ -50,6 +50,7 @@ export type PartnerRow = {
   promo_code: string;
   slug: string;
   commission_rate: number | null;
+  hero_image_url: string | null;
 };
 
 export type PartnerDailyStat = {

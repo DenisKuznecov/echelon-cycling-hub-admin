@@ -20,7 +20,9 @@ export const resolveMyPartner = cache(async (): Promise<ResolvedMyPartner> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, partners(id, name, location, promo_code, slug, commission_rate)")
+    .select(
+      "role, partners(id, name, location, promo_code, slug, commission_rate, hero_image_url)",
+    )
     .eq("id", user.id)
     .single();
 
@@ -43,7 +45,7 @@ export const resolvePartnerBySlug = cache(
     const normalizedSlug = slug.startsWith("/") ? slug : `/${slug}`;
     const { data } = await supabase
       .from("partners")
-      .select("id, name, location, promo_code, slug, commission_rate")
+      .select("id, name, location, promo_code, slug, commission_rate, hero_image_url")
       .eq("slug", normalizedSlug)
       .maybeSingle();
 
