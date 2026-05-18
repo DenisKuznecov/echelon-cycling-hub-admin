@@ -20,6 +20,7 @@ import {
   formatCentsToEuros,
   formatRentalPeriod,
 } from "@/src/utils/formatters";
+import { createClient } from "@/src/utils/supabase/client";
 import type { PartnerBookingRow } from "./types";
 import type { BookingsTimeframe } from "../_lib/loadPartnerOverview";
 import { OrderStatusBadge } from "./OrderStatusBadge";
@@ -48,6 +49,25 @@ export function AllBookingsTable({
   useEffect(() => {
     setSearch(query);
   }, [query]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("partner-orders-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        (payload) => {
+          console.log("Database changed, refreshing...", payload.eventType);
+          router.refresh();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [router]);
 
   const buildHref = (
     nextQuery: string,
