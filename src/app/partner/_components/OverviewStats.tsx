@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/ui/components/Button";
 import { Select } from "@/ui/components/Select";
+import { FeatherDownload } from "@subframe/core";
 import { formatCentsToWholeEuros } from "@/src/utils/formatters";
 import { SalesTrends } from "./SalesTrends";
 import type { BookingsTimeframe } from "../_lib/loadPartnerOverview";
@@ -12,6 +14,7 @@ interface OverviewStatsProps {
   dailyStats: PartnerDailyStat[];
   commissionRate: number;
   timeframe: BookingsTimeframe;
+  partnerId: string;
 }
 
 function toNumber(value: number | string | null | undefined): number {
@@ -27,10 +30,13 @@ export function OverviewStats({
   dailyStats,
   commissionRate,
   timeframe,
+  partnerId,
 }: OverviewStatsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const { chartData, totalOrderValueCents, totalOrders, totalCommissionCents } =
     useMemo(() => {
@@ -89,9 +95,44 @@ export function OverviewStats({
     router.push(nextHref);
   };
 
+  const handleDownload = async () => {
+    if (!partnerId) return;
+    setDownloadError(null);
+    setIsDownloading(true);
+    try {
+      const response = await fetch(
+        `/api/partners/download-report?partner_id=${encodeURIComponent(
+          partnerId,
+        )}&timeframe=${encodeURIComponent(timeframe)}`,
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to download report (${response.status})`);
+      }
+
+      const csvText = await response.text();
+      const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      const today = new Date().toISOString().slice(0, 10);
+      link.href = url;
+      link.download = `echelon_cycling_partner_report_${today}.csv`;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("[OverviewStats] download failed", err);
+      setDownloadError("Couldn't generate report. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <>
-      <div className="flex w-full justify-start">
+      <div className="flex w-full items-center justify-between gap-2">
         <Select
           className="w-40 flex-none"
           value={timeframe}
@@ -101,6 +142,25 @@ export function OverviewStats({
           <Select.Item value="month">Past Month</Select.Item>
           <Select.Item value="all-time">All-Time</Select.Item>
         </Select>
+        <div className="flex items-center gap-3">
+          {downloadError ? (
+            <span
+              className="text-body font-body text-error-700"
+              role="alert"
+            >
+              {downloadError}
+            </span>
+          ) : null}
+          <Button
+            variant="neutral-secondary"
+            icon={<FeatherDownload />}
+            loading={isDownloading}
+            disabled={isDownloading}
+            onClick={handleDownload}
+          >
+            {isDownloading ? "Generating..." : "Download Report"}
+          </Button>
+        </div>
       </div>
       <span className="text-body font-body text-subtext-color">
         * Statistic doesn&apos;t include orders in status Canceled

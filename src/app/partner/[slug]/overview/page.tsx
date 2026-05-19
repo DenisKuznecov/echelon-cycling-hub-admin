@@ -42,6 +42,7 @@ export default async function PartnerSlugOverviewPage({
         dailyStats={dailyStats}
         commissionRate={commissionRate}
         timeframe={timeframe}
+        partnerId={partner.id}
       />
       <RecentBookings
         orders={recentOrders}

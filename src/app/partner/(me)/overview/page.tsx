@@ -35,6 +35,7 @@ export default async function PartnerOverviewPage({
         dailyStats={dailyStats}
         commissionRate={commissionRate}
         timeframe={timeframe}
+        partnerId={partner?.id ?? ""}
       />
       <RecentBookings orders={recentOrders} viewAllHref="/partner/bookings" />
     </>
