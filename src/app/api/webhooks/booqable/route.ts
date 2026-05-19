@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     const orderStatus = pick(data, "data[status]");
     const orderNumber = pickInt(data, "data[number]");
 
-    if (orderStatus === "new" || !orderNumber) {
+    if (orderStatus === "new" || orderStatus === "concept" || !orderNumber) {
       console.log(`[webhooks/booqable] Ignoring ghost order. Status: ${orderStatus}, Number: ${orderNumber}`);
       // Return 200 OK so Booqable knows we received it and doesn't retry
       return NextResponse.json({ received: true, ignored: true }, { status: 200 });
@@ -93,14 +93,14 @@ export async function POST(request: Request) {
     }
 
     // Look for the promo code at the root level first, then fallback to the nested orders array
-    const partnerPromo = pick(data, "data[properties_attributes][partner_promo]");
+    const appliedCoupon = pick(data, "data[coupon_code]");
     let supabasePartnerId: string | null = null;
 
-    if (partnerPromo) {
+    if (appliedCoupon) {
       const { data: partnerRow, error: partnerError } = await supabase
         .from("partners")
         .select("id")
-        .eq("promo_code", partnerPromo)
+        .eq("promo_code", appliedCoupon)
         .maybeSingle();
 
       if (partnerError) throw partnerError;
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
         ),
         customer_id: supabaseCustomerId,
         partner_id: supabasePartnerId,
-        partner_promo: partnerPromo,
+        partner_promo: appliedCoupon,
       },
       { onConflict: "booqable_order_id" },
     );
